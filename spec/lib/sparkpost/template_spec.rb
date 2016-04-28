@@ -322,5 +322,27 @@ RSpec.describe SparkPost::Template do
       allow(template).to receive(:request).and_return(whatever: true)
       expect(template.send_payload(data)).to eq(whatever: true)
     end
+
+    it 'passes through url when passed' do
+      allow(template).to receive(:request) do |*args|
+        expect(args[0]).to eq('http://blackhole.com')
+      end
+      template.send_payload(nil, 'http://blackhole.com')
+    end
+
+    it 'calls endpoint if no url is provided' do
+      allow(template).to receive(:endpoint).and_return('oh-oh')
+      allow(template).to receive(:request) do |*args|
+        expect(args[0]).to eq('oh-oh')
+      end
+      template.send_payload(nil)
+    end
+
+    it 'passes correct method method when passed' do
+      allow(template).to receive(:request) do |*args|
+        expect(args[3]).to eq('DELETE')
+      end
+      template.send_payload(nil, nil, 'DELETE')
+    end
   end
 end

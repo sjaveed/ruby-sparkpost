@@ -93,6 +93,28 @@ RSpec.describe SparkPost::Transmission do
       allow(transmission).to receive(:request).and_return(success: 1)
       expect(transmission.send_payload(data)).to eq(success: 1)
     end
+
+    it 'passes through url when passed' do
+      allow(transmission).to receive(:request) do |*args|
+        expect(args[0]).to eq('http://blackhole.com')
+      end
+      transmission.send_payload(nil, 'http://blackhole.com')
+    end
+
+    it 'calls endpoint if no url is provided' do
+      allow(transmission).to receive(:endpoint).and_return('oh-oh')
+      allow(transmission).to receive(:request) do |*args|
+        expect(args[0]).to eq('oh-oh')
+      end
+      transmission.send_payload(nil)
+    end
+
+    it 'passes correct method method when passed' do
+      allow(transmission).to receive(:request) do |*args|
+        expect(args[3]).to eq('DELETE')
+      end
+      transmission.send_payload(nil, nil, 'DELETE')
+    end
   end
 
   describe '#send_message' do
