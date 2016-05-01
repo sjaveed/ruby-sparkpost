@@ -76,6 +76,36 @@ sp.transmission.send_message('RECIPIENT_EMAIL', 'SENDER_EMAIL', 'testemail', '<h
 
 See: [examples](examples)
 
+# Use as a Rails ActionMailer delivery agent
+
+Add an initializer (e.g. `sparkpost.rb`) with contents similar to the following:
+```ruby
+# 25e4a63698af1f4b2766c51db08fdf090fdf6956
+ActionMailer::Base.add_delivery_method :sparkpost, SparkPost::Delivery, {
+  api_key: 'your-sparkpost-api-key',
+  perform_deliveries: Rails.env.production?
+}
+```
+
+Update your `config/environments/development.rb` with an action_mailer configuration line like so:
+```ruby
+config.action_mailer.delivery_method = :sparkpost
+```
+
+Now use ActionMailer like you normally would with the following extra notes:
+
+Specify a template, add the `X-SP-Template` header with the template id of the template you'd like to use e.g.
+```ruby
+headers['X-SP-Template'] = 'template-01'
+```
+Specify substitution data hash by adding multiple `X-SP-SubstData` headers with the value of the header being a hash
+containing a set of substitution data.  All these headers will be merged before sending to SparkPost so you can split
+up your substitution data over multiple headers.
+```ruby
+headers['X-SP-SubstData'] = { first_name: 'Douglas' }.to_json
+headers['X-SP-SubstData'] = { last_name: 'Adams' }.to_json
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

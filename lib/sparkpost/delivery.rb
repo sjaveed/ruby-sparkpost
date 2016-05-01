@@ -50,7 +50,7 @@ module SparkPost
     def deliver!(mail)
       substitution_variables = {}
 
-      mail['X-SP-MergeVars'].each do |h|
+      mail['X-SP-SubstData'].each do |h|
         substitution_variables.merge!(JSON.parse(h.value))
       end
 
