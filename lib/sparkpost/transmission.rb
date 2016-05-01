@@ -43,7 +43,7 @@ module SparkPost
         options_from_args[:content][:template_id] = template_id
       else
         options_from_args[:content][:html] = html_message if html_message.present?
-        options_from_args[:content][:text] = text_message if text_message.prsent?
+        options_from_args[:content][:text] = text_message if text_message.present?
       end
 
       options.delete(:text_message)
