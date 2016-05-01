@@ -34,7 +34,7 @@ module SparkPost
         recipients: prepare_recipients(to),
         content: {
           from: from,
-          subject: subject,
+          subject: subject
         },
         options: {}
       }
@@ -42,8 +42,13 @@ module SparkPost
       if template_id.present?
         options_from_args[:content][:template_id] = template_id
       else
-        options_from_args[:content][:html] = html_message if html_message.present?
-        options_from_args[:content][:text] = text_message if text_message.present?
+        if html_message.present?
+          options_from_args[:content][:html] = html_message
+        end
+
+        if text_message.present?
+          options_from_args[:content][:text] = text_message
+        end
       end
 
       options.delete(:text_message)

@@ -1,9 +1,9 @@
 module SparkPost
   # == Sending Email with SparkPost
   #
-  # Mail allows you to send emails using SparkPost's REST API.  This allows Rails
-  # apps to continue to use ActionMailer while using the superior features of a
-  # RESTful email delivery API
+  # Mail allows you to send emails using SparkPost's REST API.  This allows
+  # Rails apps to continue to use ActionMailer while using the superior
+  # features of a RESTful email delivery API
   #
   # === Sending via RESTful API
   #
@@ -38,15 +38,14 @@ module SparkPost
 
     def initialize(values)
       self.settings = {
-          api_key: nil,
-          perform_deliveries: true
+        api_key: nil,
+        perform_deliveries: true
       }.merge!(values)
     end
 
     attr_accessor :settings
 
     # Send the message via SparkPost.
-    # The from and to attributes are optional. If not set, they are retrieve from the Message.
     def deliver!(mail)
       substitution_variables = {}
 
@@ -56,31 +55,36 @@ module SparkPost
 
       template_id = mail['X-SP-Template']
 
-      from_address, to_address = mail.smtp_envelope_from, mail.smtp_envelope_to
-
-      message_subject, message_body = mail.subject, mail.body.to_s
+      from_address = mail.smtp_envelope_from
+      to_address = mail.smtp_envelope_to
+      message_subject = mail.subject
+      message_body = mail.body.to_s
       message_body = nil unless message_body.present?
 
-      unless self.settings[:perform_deliveries]
-        to_address.map! { |a| a += '.sink.sparkpostmail.com' }
+      unless settings[:perform_deliveries]
+        to_address.map! { |a| a + '.sink.sparkpostmail.com' }
       end
 
       sparkpost_options = {
-          content: {
-              template_id: template_id
-          },
-          substitution_variables: substitution_variables
+        content: {
+          template_id: template_id
+        },
+        substitution_variables: substitution_variables
       }
 
       sparkpost_options[:content].delete(:template_id) if template_id.blank?
 
-      client.transmission.send_message(to_address, from_address, message_subject, message_body, sparkpost_options)
+      client.transmission.send_message(
+        to_address, from_address,
+        message_subject, message_body,
+        sparkpost_options
+      )
     end
 
     private
 
     def client
-      @client ||= SparkPost::Client.new(self.settings[:api_key])
+      @client ||= SparkPost::Client.new(settings[:api_key])
     end
   end
 end
