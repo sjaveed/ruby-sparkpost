@@ -23,10 +23,11 @@ module SparkPost
       # TODO: add validations for to, from
       html_message = content_from(options, :html) || html_message
       text_message = content_from(options, :text) || options[:text_message]
+      template_id = content_from(options, :template_id)
 
-      if html_message.blank? && text_message.blank?
+      if html_message.blank? && text_message.blank? && template_id.blank?
         raise ArgumentError, 'Content missing. Either provide html_message or
-         text_message in options parameter'
+         text_message or specify a valid template_id in options parameter'
       end
 
       options_from_args = {
@@ -34,11 +35,19 @@ module SparkPost
         content: {
           from: from,
           subject: subject,
-          text: options.delete(:text_message),
-          html: html_message
         },
         options: {}
       }
+
+      if template_id.present?
+        options_from_args[:content][:template_id] = template_id
+      else
+        options_from_args[:content][:html] = html_message if html_message.present?
+        options_from_args[:content][:text] = text_message if text_message.prsent?
+      end
+
+      options.delete(:text_message)
+      options.delete(:template_id)
 
       options.merge!(options_from_args) { |_k, opts, _args| opts }
       add_attachments(options)
